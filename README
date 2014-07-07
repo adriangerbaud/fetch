@@ -1,0 +1,40 @@
+Documentation
+fetch.pl
+
+Summary
+
+fetch.pl is a simple perl program that will download the data from the eGauge devices in Lira, Pabo, and Lacor (granted that they are online) and copy the files to the windows server (192.168.3.16/Office) under a folder called eGaugeData. The program can be set to run automatically every given amount of time using the cron command. 
+
+Implementation
+
+The script will first make a folder in the current directory called data. In this folder is where all of the information will be stored locally before being copied to the Office server. 
+
+NOTE: The default directory for the cron command is the home directory of the user that is running the program (in our case, root). As a result the data folder with the most up-to-date values will be in /root/data if it is run periodically with cron.
+
+The information is then extracted from the eGauge website using CGI queries that access the stored data in the internal database built into the eGauge device. More information can be attained in part 3 of the following document: http://www.egauge.net/docs/egauge-xml-api.pdf
+
+Let’s see an example of how this works. The formatting to pull the information is the following:
+
+http://XXXX.egaug.es/cgi-bin/egauge-show?params
+
+where XXXX corresponds to the site code (eg. lmnd33) and params correspond to the query parameters under part 3 of the document specified above. Each parameter should be separated by an &.
+
+fetch.pl, for example, is using something similar to the following: 
+
+http://lmnd27.egaug.es/cgi-bin/egauge-show?d&s=0&c&t=1388523600&f=1401580800&Z=:EAT
+
+The parameters I am using are the following: 
+
+d	Indicates that the s and n parameters are specified in days. In the link above I only used s.
+s	Indicates the number of rows to skip after returning the next row of information. The parameters d and s=0 means to get the data on a one day interval.
+c	Indicates to export the data as a .csv file
+t	Indicates the Unix timestamp  of the first row of information that is to be retrieved
+f	Indicates the Unix timestamp of the last row of information that is to be retrieved
+Z	Specifies the time zone. In this case, East African Time.
+
+(You can enter that link into a browser and see that the data begins downloading from midnight January 1st, 2014 to midnight June 1st 2014)
+
+Then, for all of the sites, the information will be pulled using the Linux curl command (similar to wget), with the t parameter being updated to current date every time the script run. The f parameter remains January 1st, 2014 every time. It then saves the .csv file to the data folder that was made in the current directory. It will then proceed to remove the older version of the data in the spirit of saving hard drive space. 
+
+When it is done pulling the information onto the data directory, it will erase everything in the eGaugeData folder under the Office server, and copy the new information to it. This is done to ensure only the most up-to-date information is pushed into the Windows server.
+
