@@ -3,7 +3,7 @@ fetch.pl
 
 Summary
 
-fetch.pl is a simple perl program that will download the data from the eGauge devices in Lira, Pabo, and Lacor (granted that they are online) and copy the files to the windows server (192.168.3.16/Office) under a folder called eGaugeData. The program can be set to run automatically every given amount of time using the cron command. 
+fetch.pl is a simple perl program that will download the data from the eGauge devices in Lira, Pabo, and Lacor. The program can be set to run automatically every given amount of time using the cron command. If more sites want to be added, add them to the sites.csv file.
 
 Implementation
 
@@ -35,6 +35,3 @@ Z	Specifies the time zone. In this case, East African Time.
 (You can enter that link into a browser and see that the data begins downloading from midnight January 1st, 2014 to midnight June 1st 2014)
 
 Then, for all of the sites, the information will be pulled using the Linux curl command (similar to wget), with the t parameter being updated to current date every time the script run. The f parameter remains January 1st, 2014 every time. It then saves the .csv file to the data folder that was made in the current directory. It will then proceed to remove the older version of the data in the spirit of saving hard drive space. 
-
-When it is done pulling the information onto the data directory, it will erase everything in the eGaugeData folder under the Office server, and copy the new information to it. This is done to ensure only the most up-to-date information is pushed into the Windows server.
-
