@@ -6,6 +6,8 @@ use warnings;
 
 #Declare useful variables
 
+my $fetchdir = "/home/ec2-user/fetch";
+
 my $UNIXenddate = `date +%s`;
 chomp $UNIXenddate;
 
@@ -15,10 +17,7 @@ chomp $date;
 my $datetime = `date "+%H:%M:%S %b-%d-%Y"`;
 chomp $datetime;
 
-my $wd = `pwd`;
-chomp $wd;
-
-my$datapath = "$wd/data";
+my $datapath = "$fetchdir/data";
 
 my $year = `date +%Y`;
 chomp $year;
@@ -28,21 +27,30 @@ chomp $startdate;
 
 #make data folder if it does not exist
 
+#print "$datapath\n";
+
 unless(-e $datapath)
 {
-`mkdir data`;
+`mkdir $datapath`;
 }
+
 
 
 # Populate sites hash
 my %sites;
-open my $fh, '<', 'sites.csv' or die "Cannot open: $!";
+
+open my $fh, '<', "$fetchdir/sites.csv" or die "Cannot open sites.csv: $!";
 while(my $line = <$fh>)
 {
     my @array = split/,/, $line;
+    chomp $array[1];
+    
+    # print "$destination\n";
     $sites{$array[0]} = [$array[1] , "$datapath/$array[0]"];
     
 }
+
+#print Dumper \%sites;
 
 close $fh;
 
@@ -52,6 +60,8 @@ foreach my $sitecode (keys %sites)
 	`curl "http://$sites{$sitecode}[0].egaug.es/cgi-bin/egauge-show\?d\&s=0\&c\&t=$startdate\&f=$UNIXenddate\&Z=:EAT" -o "$sites{$sitecode}[1]-$date.csv" -fs`;
 	my  $p= $? >> 8;
 
+
+	#print "curl http://$sites{$sitecode}[0].egaug.es/cgi-bin/egauge-show?d&s=0&c&t=$startdate&f=$UNIXenddate&Z=:EAT -o $sites{$sitecode}[1]-$date.csv";
 #If new data is availabe, erase the old data
 	if( $p == 0 )
 	{	
