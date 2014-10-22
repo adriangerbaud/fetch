@@ -7,9 +7,9 @@ fetch.pl is a simple perl program that will download the data from the eGauge de
 
 Implementation
 
-The script will first make a folder in the current directory called data. In this folder is where all of the information will be stored locally before being copied to the Office server. 
+The script will first make a folder in the current directory called data.
 
-NOTE: The default directory for the cron command is the home directory of the user that is running the program (in our case, root). As a result the data folder with the most up-to-date values will be in /root/data if it is run periodically with cron.
+NOTE: The paths have been hardcoded to work in an Amazon EC2 instance and must be changed if the environment changes.
 
 The information is then extracted from the eGauge website using CGI queries that access the stored data in the internal database built into the eGauge device. More information can be attained in part 3 of the following document: http://www.egauge.net/docs/egauge-xml-api.pdf
 
