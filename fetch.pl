@@ -6,7 +6,10 @@ use warnings;
 
 #Declare useful variables
 
+
 my $fetchdir = "/home/ec2-user/fetch";
+
+my $configdir= "$fetchdir/config";
 
 my $UNIXenddate = `date +%s`;
 chomp $UNIXenddate;
@@ -34,12 +37,13 @@ unless(-e $datapath)
 `mkdir $datapath`;
 }
 
+`touch "$datapath/time.log"`;
 
 
 # Populate sites hash
 my %sites;
 
-open my $fh, '<', "$fetchdir/sites.csv" or die "Cannot open sites.csv: $!";
+open my $fh, '<', "$configdir/sites.csv" or die "Cannot open sites.csv: $!"; # have a hard path to config
 while(my $line = <$fh>)
 {
     my @array = split/,/, $line;
@@ -61,21 +65,19 @@ foreach my $sitecode (keys %sites)
 	my  $p= $? >> 8;
 
 
-	#print "curl http://$sites{$sitecode}[0].egaug.es/cgi-bin/egauge-show?d&s=0&c&t=$startdate&f=$UNIXenddate&Z=:EAT -o $sites{$sitecode}[1]-$date.csv";
 #If new data is availabe, erase the old data
 	if( $p == 0 )
 	{	
-
+	
 	my $remove = `ls $datapath | grep '$sitecode' | grep -v "$date"`;
 	`rm -f $datapath/$remove`; #remove it if it is there
+	
+	open(FH, ">>", "$datapath/time.log") or die "Cannot open file";
+	select FH;
+	print "Script ran for $sitecode at $datetime\n";
+	close FH;
+
 	}
 }
 
 #make a log file that will show when the script has run. (Debugging purposes)
-
-`touch "$datapath/time.log"`;
-
-open(FH, ">>", "$datapath/time.log") or die "Cannot open file";
-select FH;
-print "Script ran at $datetime\n";
-close FH;
